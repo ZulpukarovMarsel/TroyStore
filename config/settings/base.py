@@ -19,13 +19,16 @@ WSGI_APPLICATION = "config.wsgi.application"
 PRODUCTION = env("PRODUCTION", default=False, cast=bool)
 CORS_ORIGIN_ALLOW_ALL = True
 ROOT_URLCONF = 'config.urls'
-AUTH_USER_MODEL = 'users.User'
 
 
 THIRD_PARTY_APPS = [
     "rest_framework",
     "drf_yasg",
     "django_filters",
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 
 ]
 
@@ -37,6 +40,8 @@ DJANGO_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+
 ]
 PROJECTS_APPS = [
     "apps.users",
@@ -69,6 +74,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 TEMPLATES = [
@@ -87,7 +93,29 @@ TEMPLATES = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
 
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'APP': {
+            'client_id': '361607065389-5fb3ubf7t5ckd9fjeoh9l41h97qe3bd8.apps.googleusercontent.com',
+            'secret': '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',
+            'key': ''
+        }
+    }
+}
+SITE_ID = 1
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
@@ -142,3 +170,7 @@ else:
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# id=361607065389-5fb3ubf7t5ckd9fjeoh9l41h97qe3bd8.apps.googleusercontent.com
+# secret=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
