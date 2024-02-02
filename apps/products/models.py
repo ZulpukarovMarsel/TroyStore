@@ -1,5 +1,5 @@
 from django.db import models
-
+from .constans import CM_DIRECTIONS, RUS_DIMENSION, EUR_DIMENSION, US_DIMENSION
 # Create your models here.
 class Category(models.Model):
     title = models.CharField(max_length=255)
@@ -18,8 +18,13 @@ class Product(models.Model):
         return f'Название:{self.title}, В налиичи{self.available}'
 
 
-# class ProductSize(models.Model):
-#
+class ProductSize(models.Model):
+    product = models.ForeignKey(Product, related_name='product_sizes', on_delete=models.CASCADE)
+    cm = models.IntegerField(choices=CM_DIRECTIONS, blank=True, verbose_name="Размер ноги в cm")
+    rus = models.IntegerField(choices=RUS_DIMENSION, blank=True, verbose_name="Размер ноги в rus")
+    eur = models.IntegerField(choices=EUR_DIMENSION, blank=True, verbose_name="Размер ноги в eur")
+    us = models.IntegerField(choices=US_DIMENSION,blank=True, verbose_name="Размер ноги в us")
+
 
 class Photo(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='photos')
