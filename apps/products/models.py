@@ -26,7 +26,7 @@ class ProductSize(models.Model):
     us = models.IntegerField(choices=US_DIMENSION,blank=True, verbose_name="Размер ноги в us")
 
 
-class Photo(models.Model):
+class ProductPhoto(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='photos')
     photo = models.ImageField(upload_to='/media/photo_product')
 
