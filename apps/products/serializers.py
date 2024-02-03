@@ -12,7 +12,7 @@ class ProductsSerializer(serializers.ModelSerializer):
     product_photos = ProductPhotoSerializer(many=True, read_only=True)
     class Meta:
         model = Product
-        exclude = ['product_photos', 'title', 'price']
+        exclude = ['title', 'price', 'product_photos']
 
 
 class ProductSerializer(serializers.ModelSerializer):
