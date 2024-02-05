@@ -1,5 +1,7 @@
 from .models import Product, ProductPhoto
 from apps.users.models import UserFavoriteProduct
+from apps.users.exceptions import AlreadyInFavoritesError, ProductNotFoundError
+
 
 def get_all_products():
     return Product.objects.all()
@@ -18,3 +20,14 @@ def is_event_in_favorites(user, event_id):
         return True
     except UserFavoriteProduct.DoesNotExist:
         return False
+
+def add_product_to_favorites(user, product_id):
+    try:
+        product = Product.objects.get(id=product_id)
+        if not UserFavoriteProduct.objects.filter(user=user, product_id=product_id).exists():
+            UserFavoriteProduct.objects.create(user=user, product=product)
+            return product
+        else:
+            raise AlreadyInFavoritesError()
+    except Product.DoesNotExist:
+        raise ProductNotFoundError()
