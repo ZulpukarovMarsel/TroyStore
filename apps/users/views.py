@@ -6,7 +6,7 @@ from rest_framework.exceptions import NotFound
 from apps.users.exceptions import AlreadyInFavoritesError
 from .serializers import UserProfileSerializer
 from rest_framework.views import APIView
-from apps.products.services import get_favorite_products, is_event_in_favorites, add_product_to_favorites
+from apps.products.services import get_favorite_products, is_event_in_favorites, add_product_to_favorites, remove_product_from_favorites
 from apps.products.serializers import ProductPhotoSerializer
 # Create your views here.
 class UserProfileView(generics.RetrieveUpdateAPIView):
@@ -47,3 +47,12 @@ class AddToFavoritesAPIView(APIView):
             return Response({'message': 'Продукт уже в избранном'}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({'message': 'Невозможно добавить продукт в избранное'}, status=status.HTTP_400_BAD_REQUEST)
+
+class RemoveFromFavoritesAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, product_id, format=None):
+        user = request.user
+        remove_product_from_favorites(user, product_id)
+        return Response({'message': 'Продукт удалено из избранного'}, status=status.HTTP_200_OK)
+

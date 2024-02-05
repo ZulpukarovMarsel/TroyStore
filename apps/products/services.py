@@ -31,3 +31,7 @@ def add_product_to_favorites(user, product_id):
             raise AlreadyInFavoritesError()
     except Product.DoesNotExist:
         raise ProductNotFoundError()
+
+def remove_product_from_favorites(user, product_id):
+    UserFavoriteProduct.objects.filter(user=user, product_id=product_id).delete()
+
