@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render
 from requests import Response
 from rest_framework import generics, permissions, status
@@ -6,17 +7,32 @@ from rest_framework.exceptions import NotFound
 from apps.users.exceptions import AlreadyInFavoritesError
 from .serializers import UserProfileSerializer
 from rest_framework.views import APIView
-from apps.products.services import get_favorite_products, is_event_in_favorites, add_product_to_favorites, remove_product_from_favorites
+from apps.products.services import get_favorite_products, is_event_in_favorites, add_product_to_favorites, \
+    remove_product_from_favorites
 from apps.products.serializers import ProductPhotoSerializer
+from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
+
+UserModel = get_user_model()
+
+
 # Create your views here.
 class UserProfileView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
-
     def get_object(self):
-        return self.request.user
+        if self.request.user.is_staff or self.request.user.is_authenticated \
+                and self.request.user.pk == self.kwargs['user_pk']:
+            return get_object_or_404(
+                UserModel, pk=self.kwargs['user_pk']).profile
+
+    def destroy(self, request, *args, **kwargs):
+        return JsonResponse(
+            {'message': 'DELETE method not allowed for Profile'})
+
+
 
 class FavoritesAPIView(APIView):
     permission_classes = permissions.IsAuthenticated
@@ -33,6 +49,7 @@ class FavoritesAPIView(APIView):
             products_data['selected'] = is_event_in_favorites(user, product_id)
         return data
 
+
 class AddToFavoritesAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -48,6 +65,7 @@ class AddToFavoritesAPIView(APIView):
         except:
             return Response({'message': 'Невозможно добавить продукт в избранное'}, status=status.HTTP_400_BAD_REQUEST)
 
+
 class RemoveFromFavoritesAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -55,4 +73,3 @@ class RemoveFromFavoritesAPIView(APIView):
         user = request.user
         remove_product_from_favorites(user, product_id)
         return Response({'message': 'Продукт удалено из избранного'}, status=status.HTTP_200_OK)
-

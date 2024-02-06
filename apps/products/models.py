@@ -13,7 +13,8 @@ class Product(models.Model):
     price = models.IntegerField(default=0)
     available = models.BooleanField(default=True)
     category = models.ManyToManyField(Category, related_name='products')
-
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
         return f'Название:{self.title}, В налиичи{self.available}'
 
