@@ -12,6 +12,7 @@ from apps.users.exceptions import AlreadyInFavoritesError
 from django.shortcuts import render
 from requests import Response
 from rest_framework import generics, permissions, status
+from .services import *
 
 
 class ProductModelViewSet(viewsets.ModelViewSet):
@@ -19,9 +20,11 @@ class ProductModelViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     lookup_field = 'id'
 
+
 class ProductsModelViewSet(viewsets.ModelViewSet):
     queryset = get_all_products()
     serializer_class = ProductsSerializer
+
 
 class PhotoModelViewSet(viewsets.ModelViewSet):
     queryset = get_all_product_photo()
@@ -43,6 +46,7 @@ class FavoritesAPIView(APIView):
             products_data['selected'] = is_event_in_favorites(user, product_id)
         return data
 
+
 class AddToFavoritesAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -58,6 +62,7 @@ class AddToFavoritesAPIView(APIView):
         except:
             return Response({'message': 'Невозможно добавить продукт в избранное'}, status=status.HTTP_400_BAD_REQUEST)
 
+
 class RemoveFromFavoritesAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -66,6 +71,19 @@ class RemoveFromFavoritesAPIView(APIView):
         remove_product_from_favorites(user, product_id)
         return Response({'message': 'Продукт удалено из избранного'}, status=status.HTTP_200_OK)
 
+
 class CartViewSet(viewsets.ModelViewSet):
-    queryset =
+    queryset = Cart.object.all()
     serializer_class = CartSerializer
+
+    def add_to_cart(self, request, *args, **kwargs):
+        user = self.request.user
+        product_id = request.data.get('product_id')
+        quantity = int(request.data.get('quantity', 1))
+
+        cart_item = CartService.add_to_cart(user, product_id, quantity, quantity)
+
+        serializer = CartSerializer(cart_item.cart)
+
+        return Response(serializer.data)
+
