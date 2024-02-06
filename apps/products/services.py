@@ -52,3 +52,13 @@ class CartService:
 
         return cart_item
 
+    @staticmethod
+    def remove_from_cart(user, product_id):
+        try:
+            cart = Cart.objects.get(user=user)
+            product = Product.objects.get(pk=product_id)
+            cart_item = cart.items.get(product=product)
+            cart_item.delete()
+
+        except Cart.DoesNotExist or Product.DoesNotExist or Cart.DoesNotExist:
+            pass
