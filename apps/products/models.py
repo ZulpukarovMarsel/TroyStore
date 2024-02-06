@@ -72,3 +72,14 @@ class ProductCharacteristic(models.Model):
 
     def __str__(self):
         return f'{self.name}: {self.value} for {self.product.title}'
+
+class Cart(models.Model):
+    date_created = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    items = models.ManyToManyField(Product)
+
+    class Meta:
+        verbose_name = "Корзина"
+
+    def __str__(self):
+        return f'Корзина-{self.items}'
