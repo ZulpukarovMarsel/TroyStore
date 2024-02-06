@@ -1,11 +1,11 @@
 from rest_framework import serializers
 from apps.products.models import *
 
-# class ProductPhotoSerializer(serializers.ModelSerializer):
-#
-#     class Meta:
-#         model = ProductPhoto
-#         fields = ('photo')
+class ProductPhotoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ProductPhoto
+        fields = ('photo')
 
 
 class ProductsSerializer(serializers.ModelSerializer):
@@ -27,3 +27,9 @@ class ProductPhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductPhoto
         fields = '__all__'
+
+class CartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cart
+        fields = '__all__'
+

@@ -1,4 +1,4 @@
-from .models import Product, ProductPhoto
+from .models import Product, ProductPhoto, Cart
 from apps.users.models import UserFavoriteProduct
 from apps.users.exceptions import AlreadyInFavoritesError, ProductNotFoundError
 
@@ -34,4 +34,21 @@ def add_product_to_favorites(user, product_id):
 
 def remove_product_from_favorites(user, product_id):
     UserFavoriteProduct.objects.filter(user=user, product_id=product_id).delete()
+
+class CartService:
+    @staticmethod
+    def add_to_cart(user, product_id, quantity=1):
+        try:
+            cart = Cart.objects.get(user=user)
+        except Cart.DoesNotExist:
+            cart = Cart.objects.create(user=user)
+        product = Product.objects.get(id=product_id)
+
+        cart_item, created = cart.items.get_or_create(product=product)
+
+        if not created:
+            cart_item.quantity += quantity
+            cart_item.save()
+
+        return cart_item
 
