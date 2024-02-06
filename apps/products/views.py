@@ -87,3 +87,15 @@ class CartViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
+    def remove_from_cart(self, request, *args, **kwargs):
+        user = self.request.user
+        product_id = request.data.get('product_id')
+
+        CartService.remove_from_cart(user, product_id)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get_cart_total(self, request, *args, **kwargs):
+        user = self.request.user
+        total = CartService.get_cart_total(user)
+
+        return Response({'total': total})
