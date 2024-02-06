@@ -62,3 +62,13 @@ class CartService:
 
         except Cart.DoesNotExist or Product.DoesNotExist or Cart.DoesNotExist:
             pass
+
+    @staticmethod
+    def get_cart_total(user):
+        try:
+            cart = Cart.objects.get(user=user)
+            cart_items = cart.items.all()
+            total = sum(item.product.price * item.quantity for item in cart_items)
+            return total
+        except Cart.DoesNotExist:
+            return 0
