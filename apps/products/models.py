@@ -57,6 +57,7 @@ class Delivery(models.Model):
 
     class Meta:
         verbose_name = "Доставка"
+        verbose_name_plural = "Доставка"
 
     def __str__(self):
         return f'Доставка продукта {self.product.title}'
@@ -80,6 +81,7 @@ class Cart(models.Model):
 
     class Meta:
         verbose_name = "Корзина"
+        verbose_name_plural = "Корзина"
 
     def __str__(self):
         return f'Корзина-{self.items}'
@@ -93,4 +95,4 @@ class UserFavoriteProduct(models.Model):
         verbose_name_plural = "Избранные"
 
     def __str__(self):
-        return f"{self.user.name} - {self.product.title}"
+        return f"{self.user} - {self.product.title}"

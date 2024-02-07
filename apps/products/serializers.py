@@ -5,7 +5,7 @@ class ProductsSerializer(serializers.ModelSerializer):
     # product_photos = ProductPhotoSerializer(many=True, read_only=True, label='фото')
     class Meta:
         model = Product
-        fields = ('title', 'price')
+        fields = '__all__'
 
 
 class ProductPhotoSerializer(serializers.ModelSerializer):
@@ -17,5 +17,10 @@ class ProductPhotoSerializer(serializers.ModelSerializer):
 class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
+        fields = '__all__'
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserFavoriteProduct
         fields = '__all__'
 

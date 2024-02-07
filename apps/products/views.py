@@ -23,8 +23,8 @@ class PhotoViewSet(viewsets.ModelViewSet):
 
 class FavoritesViewSet(viewsets.ModelViewSet):
     queryset = UserFavoritesService.get_class_favorites()
-    permission_classes = permissions.IsAuthenticated
-
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = FavoriteSerializer
     def get_favorite(self, request):
         user = request.user
         products = UserFavoritesService.get_favorite_products(user)

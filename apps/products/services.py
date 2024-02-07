@@ -22,18 +22,14 @@ class UserFavoritesService:
         products = Product.objects.filter(pk__in=product_ids)
         return products
     @staticmethod
-    def is_event_in_favorites(user, event_id):
-        try:
-            favorite_event = UserFavoriteProduct.objects.get(user=user, event_id=event_id)
-            return True
-        except UserFavoriteProduct.DoesNotExist:
-            return False
+    def is_product_in_favorites(user, product_id):
+        return UserFavoriteProduct.objects.filter(user=user, product_id=product_id).exists()
 
     @staticmethod
     def add_product_to_favorites(user, product_id):
         try:
             product = Product.objects.get(id=product_id)
-            if not UserFavoriteProduct.objects.filter(user=user, product_id=product_id).exists():
+            if not UserFavoritesService.is_product_in_favorites(user, product_id):
                 UserFavoriteProduct.objects.create(user=user, product=product)
                 return product
             else:
