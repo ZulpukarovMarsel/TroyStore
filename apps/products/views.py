@@ -2,10 +2,6 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from .serializers import *
-from apps.products.services import get_all_products, get_all_product_photo
-from rest_framework.views import APIView
-from apps.products.services import get_favorite_products, is_event_in_favorites, add_product_to_favorites, \
-    remove_product_from_favorites
 from apps.products.serializers import ProductPhotoSerializer
 from rest_framework.exceptions import NotFound
 from apps.users.exceptions import AlreadyInFavoritesError
@@ -14,46 +10,37 @@ from requests import Response
 from rest_framework import generics, permissions, status
 from .services import *
 
-
-class ProductModelViewSet(viewsets.ModelViewSet):
-    queryset = get_all_products()
-    serializer_class = ProductSerializer
+class ProductsViewSet(viewsets.ModelViewSet):
+    queryset = ProductService.get_all_products()
+    serializer_class = ProductsSerializer
     lookup_field = 'id'
 
 
-class ProductsModelViewSet(viewsets.ModelViewSet):
-    queryset = get_all_products()
-    serializer_class = ProductsSerializer
-
-
-class PhotoModelViewSet(viewsets.ModelViewSet):
-    queryset = get_all_product_photo()
+class PhotoViewSet(viewsets.ModelViewSet):
+    queryset = ProductService.get_all_product_photo()
     serializer_class = ProductPhotoSerializer
 
 
-class FavoritesAPIView(APIView):
+class FavoritesViewSet(viewsets.ModelViewSet):
+    queryset = UserFavoritesService.get_class_favorites()
     permission_classes = permissions.IsAuthenticated
 
-    def get(self, request, format=None):
+    def get_favorite(self, request):
         user = request.user
-        products = get_favorite_products(user)
+        products = UserFavoritesService.get_favorite_products(user)
 
         serialized_products = ProductPhotoSerializer(products, many=True)
         data = serialized_products.data
 
         for products_data in data:
             product_id = products_data.get('id')
-            products_data['selected'] = is_event_in_favorites(user, product_id)
+            products_data['selected'] = UserFavoritesService.is_event_in_favorites(user, product_id)
         return data
 
-
-class AddToFavoritesAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request, product_id, format=None):
+    def add_to_favorite(self, request, product_id):
         user = request.user
         try:
-            product = add_product_to_favorites(user, product_id)
+            product = UserFavoritesService.add_product_to_favorites(user, product_id)
             return Response({'message': 'Продукт добавлено в избранное'}, status=status.HTTP_200_OK)
         except NotFound as e:
             return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
@@ -62,13 +49,9 @@ class AddToFavoritesAPIView(APIView):
         except:
             return Response({'message': 'Невозможно добавить продукт в избранное'}, status=status.HTTP_400_BAD_REQUEST)
 
-
-class RemoveFromFavoritesAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request, product_id, format=None):
+    def remove_from_favorite(self, request, product_id):
         user = request.user
-        remove_product_from_favorites(user, product_id)
+        UserFavoritesService.remove_product_from_favorites(user, product_id)
         return Response({'message': 'Продукт удалено из избранного'}, status=status.HTTP_200_OK)
 
 

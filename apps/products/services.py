@@ -1,5 +1,4 @@
-from .models import Product, ProductPhoto, Cart
-from apps.users.models import UserFavoriteProduct
+from .models import Product, ProductPhoto, Cart, UserFavoriteProduct
 from apps.users.exceptions import AlreadyInFavoritesError, ProductNotFoundError
 
 class ProductService:
@@ -10,7 +9,12 @@ class ProductService:
     @staticmethod
     def get_all_product_photo():
         return ProductPhoto.objects.all()
+
 class UserFavoritesService:
+    @staticmethod
+    def get_class_favorites():
+        return UserFavoriteProduct.objects.all()
+
     @staticmethod
     def get_favorite_products(user):
         favorites_products = UserFavoriteProduct.objects.filter(user=user, product=Product)
@@ -42,6 +46,10 @@ class UserFavoritesService:
         UserFavoriteProduct.objects.filter(user=user, product_id=product_id).delete()
 
 class CartService:
+    @staticmethod
+    def get_class_cart():
+        return Cart.objects.all()
+
     @staticmethod
     def add_to_cart(user, product_id, quantity=1):
         try:
