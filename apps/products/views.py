@@ -1,20 +1,24 @@
-from django.shortcuts import render
 from rest_framework import viewsets
-from rest_framework.views import APIView
 from .serializers import *
 from apps.products.serializers import ProductPhotoSerializer
 from rest_framework.exceptions import NotFound
-from apps.users.exceptions import AlreadyInFavoritesError
-from django.shortcuts import render
 from requests import Response
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, filters
 from .services import *
 
 class ProductsViewSet(viewsets.ModelViewSet):
     queryset = ProductService.get_all_products()
     serializer_class = ProductsSerializer
     lookup_field = 'id'
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['title']
 
+    def get_queryset(self):
+        queryset = ProductService.get_all_products()
+        search_query = self.request.query_params.get('search', None)
+        if search_query:
+            queryset = queryset.filter(title__icontains=search_query)
+        return queryset
 
 class PhotoViewSet(viewsets.ModelViewSet):
     queryset = ProductService.get_all_product_photo()
