@@ -56,7 +56,7 @@ class FavoritesViewSet(viewsets.ModelViewSet):
 
 
 class CartViewSet(viewsets.ModelViewSet):
-    queryset = Cart.object.all()
+    queryset = CartService.get_class_cart()
     serializer_class = CartSerializer
 
     def add_to_cart(self, request, *args, **kwargs):
