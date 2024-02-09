@@ -1,17 +1,38 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
+from .models import User
+from rest_framework.exceptions import ValidationError
+
+
+class PasswordResetNewPasswordSerializer(serializers.Serializer):
+    code = serializers.IntegerField(min_value=1000, max_value=9999)
+    password = serializers.CharField(
+        style={"input_type": "password"}, min_length=4
+    )
+
+
+class PasswordResetCodeSerializer(serializers.Serializer):
+    code = serializers.CharField()
+
+
+class PasswordResetSearchUserSerializer(serializers.Serializer):
+    email = serializers.CharField()
+
+    def validate_email(self, email):
+        try:
+            User.objects.get(email=email)
+        except User.DoesNotExist:
+            return ValidationError(
+                f"Пользователь с указанным адресом электронной почты не найден."
+            )
+        return email
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'email')
+        fields = ('id', 'email')
 
     def update(self, instance, validated_data):
         instance.email = validated_data.get('email', instance.email)
-        instance.firstname = validated_data.get('username', instance.username)
-        instance.firstname = validated_data.get('first_name', instance.firstname)
-        instance.firstname = validated_data.get('first_name', instance.firstname)
-        instance.lastname = validated_data.get('last_name', instance.lastname)
         instance.save()
         return instance
