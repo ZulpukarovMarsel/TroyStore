@@ -26,6 +26,11 @@ class PasswordResetSearchUserSerializer(serializers.Serializer):
             )
         return email
 
+class UserRegistrationSerailizer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("email", "password")
+
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:

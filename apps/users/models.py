@@ -3,7 +3,7 @@ from apps.users.managers import UserManager
 from django.db import models
 
 class User(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(unique=True, verbose_name="Эл. почта")
+    email = models.EmailField(max_length=255, unique=True, verbose_name="Эл. почта")
     is_active = models.BooleanField("Активен", default=True)
     is_staff = models.BooleanField("Персонал", default=False)
     data_joined = models.DateTimeField("Дата регистрации", auto_now_add=True)
