@@ -37,6 +37,9 @@ class UserLoginSerializer(serializers.Serializer):
         style={"input_type": "password"}, help_text="min length 3", min_length=3
     )
 
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

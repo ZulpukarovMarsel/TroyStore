@@ -5,8 +5,9 @@ from django.contrib.auth import authenticate
 from apps.users.models import User
 from .serializers import UserProfileSerializer
 from django.shortcuts import get_object_or_404
-from apps.users.serializers import UserRegistrationSerailizer, UserLoginSerializer
+from apps.users.serializers import UserRegistrationSerailizer, UserLoginSerializer, LogoutSerializer
 from .services import GetLoginResponseService
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class UserRegistrationAPIView(generics.CreateAPIView):
@@ -46,6 +47,27 @@ class UserLoginAPIView(generics.CreateAPIView):
         return response.Response(
             data=GetLoginResponseService.get_login_response(user, request)
         )
+
+class LogoutAPIView(generics.CreateAPIView):
+    """ API for user logout """
+
+    serializer_class = LogoutSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        try:
+            serializer = self.serializer_class(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            token = RefreshToken(serializer.validated_data['refresh'])
+            token.blacklist()
+            return response.Response(data={"detail": "Success", "status": status.HTTP_200_OK})
+        except Exception as e:
+            return response.Response(data={"error": f"{e}"}, status=status.HTTP_204_NO_CONTENT)
+
+    def get_queryset(self):
+        queryset = User.objects.all()
+        return queryset
+
 
 class UserProfileView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
