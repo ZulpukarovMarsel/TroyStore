@@ -1,11 +1,11 @@
 from django.db import IntegrityError
 from django.http import JsonResponse
-from requests import Response
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, response, exceptions
+from django.contrib.auth import authenticate
 from apps.users.models import User
 from .serializers import UserProfileSerializer
 from django.shortcuts import get_object_or_404
-from apps.users.serializers import UserRegistrationSerailizer
+from apps.users.serializers import UserRegistrationSerailizer, UserLoginSerializer
 from .services import GetLoginResponseService
 
 
@@ -21,17 +21,32 @@ class UserRegistrationAPIView(generics.CreateAPIView):
                                                        email=serializer.validated_data["email"],
                                                        password=serializer.validated_data["password"],
                                                        )
-                return Response(data=GetLoginResponseService.get_login_response(user, request))
+                return response.Response(data=GetLoginResponseService.get_login_response(user, request))
 
             else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except IntegrityError:
-            return Response(
+            return response.Response(
                 data={"detail": "Пользователь с данной электронной почтой существует!",
-                      "erro": status.HTTP_409_CONFLICT})
+                      "status": status.HTTP_409_CONFLICT})
 
+class UserLoginAPIView(generics.CreateAPIView):
+    """ API for user sign in """
 
-# Create your views here.
+    serializer_class = UserLoginSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = authenticate(**serializer.validated_data)
+        if not user:
+            raise exceptions.AuthenticationFailed
+
+        return response.Response(
+            data=GetLoginResponseService.get_login_response(user, request)
+        )
+
 class UserProfileView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer

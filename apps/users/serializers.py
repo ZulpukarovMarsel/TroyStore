@@ -31,6 +31,11 @@ class UserRegistrationSerailizer(serializers.ModelSerializer):
         model = User
         fields = ("email", "password")
 
+class UserLoginSerializer(serializers.Serializer):
+    email = serializers.CharField()
+    password = serializers.CharField(
+        style={"input_type": "password"}, help_text="min length 3", min_length=3
+    )
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
