@@ -1,9 +1,9 @@
 from django.db import IntegrityError
 from django.http import JsonResponse
 from rest_framework import generics, permissions, status, response, exceptions
-from django.contrib.auth import authenticate
-from apps.users.models import User
-from .serializers import UserProfileSerializer
+from django.contrib.auth import authenticate, hashers
+from apps.users.models import User, PasswordResetToken
+from .serializers import *
 from django.shortcuts import get_object_or_404
 from apps.users.serializers import UserRegistrationSerailizer, UserLoginSerializer, LogoutSerializer
 from .services import GetLoginResponseService
@@ -67,6 +67,28 @@ class LogoutAPIView(generics.CreateAPIView):
     def get_queryset(self):
         queryset = User.objects.all()
         return queryset
+
+class PasswordResetNewPasswordAPIView(generics.CreateAPIView):
+    """ API для сброса пароля """
+
+    serializer_class = PasswordResetNewPasswordSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+
+        password_reset_token = get_object_or_404(PasswordResetToken,
+                                                 code=request.data['code'])
+
+        serializer.is_valid(raise_exception=True)
+        user = password_reset_token.user
+        password = serializer.validated_data["password"]
+        user.password = hashers.make_password(password)
+        user.save()
+
+        password_reset_token.delete()
+
+        return response.Response(
+            data={"detail": "Пароль успешно сброшен."}, status=status.HTTP_200_OK)
 
 
 class UserProfileView(generics.RetrieveUpdateAPIView):
