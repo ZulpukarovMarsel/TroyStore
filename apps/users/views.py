@@ -1,3 +1,5 @@
+from datetime import timezone
+
 from django.db import IntegrityError
 from django.http import JsonResponse
 from rest_framework import generics, permissions, status, response, exceptions
@@ -89,6 +91,28 @@ class PasswordResetNewPasswordAPIView(generics.CreateAPIView):
 
         return response.Response(
             data={"detail": "Пароль успешно сброшен."}, status=status.HTTP_200_OK)
+
+class PasswordResetCodeAPIView(generics.CreateAPIView):
+    """ API для введения токена """
+
+    serializer_class = serializers.PasswordResetCodeSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            code = serializer.validated_data["code"]
+            reset_code = PasswordResetToken.objects.get(
+                code=code, time__gt=timezone.now()
+            )
+        except Exception as e:
+            return response.Response(
+                status=status.HTTP_406_NOT_ACCEPTABLE,
+                data={
+                    "error": f"Недействительный код для сброса пароля или время истечения кода закончилось.{e}"},
+            )
+        return response.Response(
+            data={"detail": "success", "code": f"{code}"}, status=status.HTTP_200_OK)
 
 
 class UserProfileView(generics.RetrieveUpdateAPIView):
