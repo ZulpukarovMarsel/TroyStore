@@ -14,7 +14,8 @@ class Category(models.Model):
 class Product(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    price = models.IntegerField(default=0)
+    price = models.PositiveIntegerField(default=0)
+    quantity = models.PositiveIntegerField()
     available = models.BooleanField(default=True)
     category = models.ManyToManyField(Category, related_name='products')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -85,6 +86,13 @@ class Cart(models.Model):
 
     def __str__(self):
         return f'Корзина-{self.items}'
+
+    def add_amount(self):
+        amount = self.product.price * self.product.quantity
+        profile = self.user.profile
+        profile.total_price = profile.total_price + amount
+        profile.save()
+        return True
 
 class UserFavoriteProduct(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)

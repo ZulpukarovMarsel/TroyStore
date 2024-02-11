@@ -17,11 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from config.settings.yasg import urlpatterns as doc_urls
+from config.settings.base import MEDIA_URL, MEDIA_ROOT
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/user/', include('apps.users.urls')),
-    path('api/v1/', include('apps.products.urls'))
+    path('api/v1/', include('apps.products.urls')) + static(MEDIA_URL, document_root=MEDIA_ROOT)
 ]
 
 urlpatterns += doc_urls
