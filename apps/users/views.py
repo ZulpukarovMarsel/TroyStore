@@ -95,7 +95,7 @@ class PasswordResetNewPasswordAPIView(generics.CreateAPIView):
 class PasswordResetCodeAPIView(generics.CreateAPIView):
     """ API для введения токена """
 
-    serializer_class = serializers.PasswordResetCodeSerializer
+    serializer_class = PasswordResetCodeSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)

@@ -19,6 +19,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 PRODUCTION = env("PRODUCTION", default=False, cast=bool)
 CORS_ORIGIN_ALLOW_ALL = True
 ROOT_URLCONF = 'config.urls'
+AUTH_USER_MODEL = "users.User"
 
 
 THIRD_PARTY_APPS = [

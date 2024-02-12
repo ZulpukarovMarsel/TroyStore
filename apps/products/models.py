@@ -1,5 +1,7 @@
 from django.db import models
 from .constans import CM_DIRECTIONS, RUS_DIMENSION, EUR_DIMENSION, US_DIMENSION
+from apps.users.models import User
+
 # Create your models here.
 class Category(models.Model):
     title = models.CharField(max_length=255)
@@ -13,7 +15,6 @@ class Category(models.Model):
 
 class Product(models.Model):
     title = models.CharField(max_length=255)
-    description = models.TextField()
     price = models.PositiveIntegerField(default=0)
     quantity = models.PositiveIntegerField()
     available = models.BooleanField(default=True)
@@ -77,7 +78,7 @@ class ProductCharacteristic(models.Model):
 
 class Cart(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     items = models.ManyToManyField(Product)
 
     class Meta:
@@ -96,7 +97,7 @@ class Cart(models.Model):
 
 class UserFavoriteProduct(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     class Meta:
         verbose_name = "Избранное"
