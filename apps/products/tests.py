@@ -6,7 +6,7 @@ from .models import Product, UserFavoriteProduct
 class FavoritesTestCase(TestCase):
     def setUp(self):
         # Создаем пользователя
-        self.user = User.objects.create_user(username='testuser', password='testpass')
+        self.user = User.objects.create_user(email='testuser@gmail.com', password='testpass')
 
         # Создаем продукт
         self.product = Product.objects.create(title='Test Product')
@@ -15,7 +15,7 @@ class FavoritesTestCase(TestCase):
         self.client = APIClient()
 
         # Логинимся под созданным пользователем
-        self.client.login(username='testuser', password='testpass')
+        self.client.login(email='testuser@gmail.com', password='testpass')
 
     def test_add_to_favorite(self):
         # Запрашиваем API для добавления продукта в избранное
