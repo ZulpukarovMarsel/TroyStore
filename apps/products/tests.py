@@ -17,3 +17,13 @@ class FavoritesTestCase(TestCase):
         # Логинимся под созданным пользователем
         self.client.login(username='testuser', password='testpass')
 
+    def test_add_to_favorite(self):
+        # Запрашиваем API для добавления продукта в избранное
+        response = self.client.post(f'/api/v1/favorites/{self.product.id}/')
+
+        # Проверяем, что запрос завершился успешно
+        self.assertEqual(response.status_code, 200)
+
+        # Проверяем, что продукт добавлен в избранное для пользователя
+        self.assertTrue(UserFavoriteProduct.objects.filter(user=self.user, product=self.product).exists())
+
