@@ -17,17 +17,17 @@ class UserFavoritesService:
 
     @staticmethod
     def get_favorite_products(user):
-        favorites_products = UserFavoriteProduct.objects.filter(user=user, product=Product)
+        favorites_products = UserFavoriteProduct.objects.filter(user=user)
         product_ids = favorites_products.values_list('product_id', flat=True)
         products = Product.objects.filter(pk__in=product_ids)
         return products
     @staticmethod
     def is_product_in_favorites(user, product_id):
         try:
-            favorite_product = UserFavoriteProduct.objects.get(user=user, product=product_id)
+            favorite_product = UserFavoriteProduct.objects.get(user=user, product_id=product_id)
             return favorite_product
         except UserFavoriteProduct.DoesNotExist:
-            return False
+            return None
 
     @staticmethod
     def add_product_to_favorites(user, product_id):
