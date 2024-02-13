@@ -102,6 +102,6 @@ class UserFavoriteProduct(models.Model):
     class Meta:
         verbose_name = "Избранное"
         verbose_name_plural = "Избранные"
-
+        unique_together = ('user', 'product')
     def __str__(self):
         return f"{self.user} - {self.product.title}"

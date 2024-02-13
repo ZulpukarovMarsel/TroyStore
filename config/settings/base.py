@@ -101,22 +101,22 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-        },
-        'APP': {
-            'client_id': '361607065389-5fb3ubf7t5ckd9fjeoh9l41h97qe3bd8.apps.googleusercontent.com',
-            'secret': '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',
-            'key': ''
-        }
-    }
-}
+# SOCIALACCOUNT_PROVIDERS = {
+#     'google': {
+#         'SCOPE': [
+#             'profile',
+#             'email',
+#         ],
+#         'AUTH_PARAMS': {
+#             'access_type': 'online',
+#         },
+#         'APP': {
+#             'client_id': '361607065389-5fb3ubf7t5ckd9fjeoh9l41h97qe3bd8.apps.googleusercontent.com',
+#             'secret': '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',
+#             'key': ''
+#         }
+#     }
+# }
 SITE_ID = 1
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

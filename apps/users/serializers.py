@@ -2,6 +2,10 @@ from rest_framework import serializers
 from .models import User
 from rest_framework.exceptions import ValidationError
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'email')
 
 class PasswordResetNewPasswordSerializer(serializers.Serializer):
     code = serializers.IntegerField(min_value=1000, max_value=9999)

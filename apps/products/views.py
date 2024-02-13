@@ -12,6 +12,7 @@ class ProductsViewSet(viewsets.ModelViewSet):
     lookup_field = 'id'
     filter_backends = [filters.SearchFilter]
     search_fields = ['title']
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         queryset = ProductService.get_all_products()
@@ -33,12 +34,12 @@ class FavoritesViewSet(viewsets.ModelViewSet):
         user = request.user
         products = UserFavoritesService.get_favorite_products(user)
 
-        serialized_products = ProductPhotoSerializer(products, many=True)
+        serialized_products = ProductsSerializer(products, many=True)
         data = serialized_products.data
 
         for products_data in data:
             product_id = products_data.get('id')
-            products_data['selected'] = UserFavoritesService.is_event_in_favorites(user, product_id)
+            products_data['selected'] = UserFavoritesService.is_product_in_favorites(user, product_id)
         return data
 
     def add_to_favorite(self, request, product_id):
@@ -62,6 +63,7 @@ class FavoritesViewSet(viewsets.ModelViewSet):
 class CartViewSet(viewsets.ModelViewSet):
     queryset = CartService.get_class_cart()
     serializer_class = CartSerializer
+    permission_classes = (permissions.IsAuthenticated,)
 
     def add_to_cart(self, request, *args, **kwargs):
         user = self.request.user

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from apps.products.models import *
 from rest_framework.fields import IntegerField
-
+from apps.users.serializers import UserSerializer
 class DeliverySerializer(serializers.ModelSerializer):
     class Meta:
         model = Delivery
@@ -27,20 +27,27 @@ class CartSerializer(serializers.ModelSerializer):
         model = Cart
         fields = '__all__'
 
-class FavoriteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserFavoriteProduct
-        fields = '__all__'
-
 class ProductsSerializer(serializers.ModelSerializer):
     # views = IntegerField(read_only=True)
-    product_photos = ProductPhotoSerializer(read_only=True)
-    delivery = DeliverySerializer(read_only=True)
-    product_characteristics = ProductCharacteristicSerializer(read_only=True)
-    product_size = ProductSizeSerializer(read_only=True)
+    product_photos = ProductPhotoSerializer(many=True, read_only=True)
+    delivery = DeliverySerializer(read_only=True, many=True)
+    product_characteristics = ProductCharacteristicSerializer(read_only=True, many=True)
+    product_size = ProductSizeSerializer(read_only=True, many=True)
 
     class Meta:
         model = Product
         fields = ('id', 'product_photos', 'delivery', 'product_characteristics', 'product_size', 'title', 'price',
                   'quantity', 'available', 'category')
         depth = 1
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('id', 'title')
+        depth = 1
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    product = ProductSerializer()
+    class Meta:
+        model = UserFavoriteProduct
+        fields = '__all__'
