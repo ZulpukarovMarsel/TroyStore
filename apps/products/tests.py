@@ -27,3 +27,15 @@ class FavoritesTestCase(TestCase):
         # Проверяем, что продукт добавлен в избранное для пользователя
         self.assertTrue(UserFavoriteProduct.objects.filter(user=self.user, product=self.product).exists())
 
+    def test_remove_from_favorite(self):
+        # Добавляем продукт в избранное для пользователя
+        UserFavoriteProduct.objects.create(user=self.user, product=self.product)
+
+        # Запрашиваем API для удаления продукта из избранного
+        response = self.client.delete(f'/api/v1/favorites/{self.product.id}/')
+
+        # Проверяем, что запрос завершился успешно
+        self.assertEqual(response.status_code, 200)
+
+        # Проверяем, что продукт удален из избранного для пользователя
+        self.assertFalse(UserFavoriteProduct.objects.filter(user=self.user, product=self.product).exists())
