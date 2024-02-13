@@ -121,12 +121,5 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_object(self):
-        if self.request.user.is_staff or self.request.user.is_authenticated \
-                and self.request.user.pk == self.kwargs['user_pk']:
-            return get_object_or_404(
-                User, pk=self.kwargs['user_pk']).profile
-
-    def destroy(self, request, *args, **kwargs):
-        return JsonResponse(
-            {'message': 'DELETE method not allowed for Profile'})
+        return self.request.user
 
