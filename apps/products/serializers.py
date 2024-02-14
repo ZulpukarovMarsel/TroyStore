@@ -46,8 +46,8 @@ class ProductSerializer(serializers.ModelSerializer):
         depth = 1
 
 class FavoriteSerializer(serializers.ModelSerializer):
-    user = serializers.SerializerMethodField()
-    product = serializers.SerializerMethodField()
+    user = UserSerializer(read_only=True, many=True)
+    product = ProductSerializer(many=True, read_only=True)
 
     class Meta:
         model = UserFavoriteProduct

@@ -1,3 +1,4 @@
+from django.http import Http404
 from rest_framework import viewsets
 from .serializers import *
 from apps.products.serializers import ProductPhotoSerializer
@@ -7,6 +8,7 @@ from rest_framework import generics, permissions, status, filters
 from .services import *
 from rest_framework.decorators import action
 from rest_framework.views import APIView
+from rest_framework.pagination import PageNumberPagination
 
 
 class ProductsViewSet(viewsets.ModelViewSet):
@@ -30,30 +32,80 @@ class PhotoViewSet(viewsets.ModelViewSet):
     serializer_class = ProductPhotoSerializer
 
 
-# class FavoritesViewSet(viewsets.ModelViewSet):
-#     queryset = UserFavoritesService.get_class_favorites()
+class FavoritesViewSet(viewsets.ModelViewSet):
+    queryset = UserFavoritesService.get_class_favorites()
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = FavoriteSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        products = UserFavoritesService.get_favorite_products(user)
+        return products
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        # Пагинируем результат
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(queryset, request)
+
+        # Сериализуем пагинированные данные
+        serializer = self.serializer_class(page, many=True)
+        data = serializer.data
+
+        user = self.request.user
+        for product_data in data:
+            product_id = product_data.get("product_id")
+            product_data['selected'] = UserFavoritesService.is_product_in_favorites(user, product_id)
+
+        # Возвращаем только список продуктов
+        return Response(data)
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        product_id = self.request.data.get('product_id')
+
+        try:
+            product = UserFavoritesService.add_product_to_favorites(user, product_id)
+        except Http404:
+            raise serializers.ValidationError({'message': 'Продукт не найден'})
+        except AlreadyInFavoritesError:
+            raise serializers.ValidationError({'message': 'Продукт уже в избранном'})
+        except Exception as e:
+            raise serializers.ValidationError({'message': str(e)})
+
+    def perform_destroy(self, instance):
+        user = self.request.user
+        product_id = instance.product_id
+
+        try:
+            UserFavoritesService.remove_product_from_favorites(user, product_id)
+        except Http404:
+            raise serializers.ValidationError({'message': 'Продукт не найден'})
+        except Exception as e:
+            raise serializers.ValidationError({'message': str(e)})
+
+
+# class FavoritesViewSet(APIView):
 #     permission_classes = [permissions.IsAuthenticated]
-#     serializer_class = FavoriteSerializer
 #
-#     @action(detail=False, methods=['get'])
-#     def get_favorite(self, request):
+#     def get(self, request):
 #         user = request.user
-#         favorite_products = UserFavoritesService.get_favorite_products(user)
+#         products = UserFavoritesService.get_favorite_products(user)
 #
-#         serialized_favorite_products = FavoriteSerializer(favorite_products, many=True)
-#         data = serialized_favorite_products.data
+#         serialized_products = FavoriteSerializer(products, many=True)  # Используйте FavoriteSerializer
+#         data = serialized_products.data
 #
 #         for product_data in data:
-#             product_data['selected'] = True  # Помечаем продукты как избранные, поскольку это запрос на избранные продукты пользователя
-#
+#             product_id = product_data.get('id')
+#             product_data['selected'] = UserFavoritesService.is_product_in_favorites(user, product_id)
 #         return Response(data)
 #
-#     @action(detail=False, methods=['post'])
-#     def add_to_favorite(self, request, product_id):
+#     def post(self, request, product_id):
 #         user = request.user
 #         try:
 #             product = UserFavoritesService.add_product_to_favorites(user, product_id)
-#             return Response({'message': 'Продукт добавлено в избранное'}, status=status.HTTP_200_OK)
+#             return Response({'message': 'Продукт добавлен в избранное'}, status=status.HTTP_200_OK)
 #         except NotFound as e:
 #             return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
 #         except AlreadyInFavoritesError:
@@ -61,43 +113,10 @@ class PhotoViewSet(viewsets.ModelViewSet):
 #         except:
 #             return Response({'message': 'Невозможно добавить продукт в избранное'}, status=status.HTTP_400_BAD_REQUEST)
 #
-#     @action(detail=True, methods=['delete'])
-#     def remove_from_favorite(self, request, product_id):
+#     def delete(self, request, product_id):
 #         user = request.user
 #         UserFavoritesService.remove_product_from_favorites(user, product_id)
-#         return Response({'message': 'Продукт удалено из избранного'}, status=status.HTTP_200_OK)
-
-class FavoritesViewSet(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request):
-        user = request.user
-        products = UserFavoritesService.get_favorite_products(user)
-
-        serialized_products = FavoriteSerializer(products, many=True)  # Используйте FavoriteSerializer
-        data = serialized_products.data
-
-        for product_data in data:
-            product_id = product_data.get('id')
-            product_data['selected'] = UserFavoritesService.is_product_in_favorites(user, product_id)
-        return Response(data)
-
-    def post(self, request, product_id):
-        user = request.user
-        try:
-            product = UserFavoritesService.add_product_to_favorites(user, product_id)
-            return Response({'message': 'Продукт добавлен в избранное'}, status=status.HTTP_200_OK)
-        except NotFound as e:
-            return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
-        except AlreadyInFavoritesError:
-            return Response({'message': 'Продукт уже в избранном'}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({'message': 'Невозможно добавить продукт в избранное'}, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, product_id):
-        user = request.user
-        UserFavoritesService.remove_product_from_favorites(user, product_id)
-        return Response({'message': 'Продукт удален из избранного'}, status=status.HTTP_200_OK)
+#         return Response({'message': 'Продукт удален из избранного'}, status=status.HTTP_200_OK)
 
 
 class CartViewSet(viewsets.ModelViewSet):
